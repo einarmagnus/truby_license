@@ -38,7 +38,11 @@ class TrubyLicense
     @salt = "\xCE\xFB\xDE\xAC\x05\x02\x19q"
   end
 
-  def deserialize_license license_blob
+  def deserialize_license license_blob, opts = {}
+    opts = {
+      :verify_signature => true
+    }.merge(opts)
+
     begin
       license_data = gunzip(decrypt(license_blob))
     rescue OpenSSL::Cipher::CipherError
@@ -47,29 +51,30 @@ class TrubyLicense
       raise InvalidLicense.new "Invalid format of license blob: not gzipped corrrectly"
     end
 
-
     JavabeanXml.from_xml license_data,
 
       :string => lambda { |value, properties| value },
       "de.schlichtherle.xml.GenericCertificate" => lambda { |v, properties|
-        sig = b64d(properties[:signature])
-        license =properties[:encoded]
-        algorithm = properties[:signatureAlgorithm]
-        encoding = properties[:signatureEncoding]
-        unless algorithm == "SHA1withDSA"
-          raise NotImplementedError.new(
-                  "signature algorithm %s has not been implemented".
-                  % algorithm
-                )
-        end
-        unless encoding == "US-ASCII/Base64"
-          raise NotImplementedError.new(
-                  "signature encoding %s has not been implemented".
-                  % encoding
-                )
-        end
-        unless verify_signature(license, sig)
-          raise InvalidLicense.new("License signature mismatch")
+        license = properties[:encoded]
+        if opts[:verify_signature]
+          signature = b64d(properties[:signature])
+          algorithm = properties[:signatureAlgorithm]
+          encoding = properties[:signatureEncoding]
+          unless algorithm == "SHA1withDSA"
+            raise NotImplementedError.new(
+                    "signature algorithm %s has not been implemented".
+                    % algorithm
+                  )
+          end
+          unless encoding == "US-ASCII/Base64"
+            raise NotImplementedError.new(
+                    "signature encoding %s has not been implemented".
+                    % encoding
+                  )
+          end
+          unless verify_signature(license, signature)
+            raise InvalidLicense.new("License signature mismatch")
+          end
         end
         JavabeanXml.from_xml(license,
           :long => lambda { |value, p| value.to_i },

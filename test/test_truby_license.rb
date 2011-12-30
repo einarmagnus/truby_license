@@ -102,7 +102,32 @@ class TestTrubyLicense < Test::Unit::TestCase
     end
   end
 
+  def test_invalid_license_can_be_read
+    ld = TrubyLicense::LicenseData.new
 
+    ld.consumerType = "0"
+    ld.notBefore = 5.days.ago
+    ld.notAfter = 10.days.from_now
+    ld.extra = "an <html><document /></html>"
+    ld.subject = "Some subject"
+    ld.holder = "CN=Einar Boson"
+    ld.issued = Time.at(Time.now.to_i) # strip ns
+    ld.issuer = "CN=Einar Boson"
+    tl_priv = TrubyLicense.new "my secret password", @key1[:priv]
+    tl_pub = TrubyLicense.new "my secret password", @key1[:pub]
+    t2_pub = TrubyLicense.new "my secret password", @key2[:pub]
+
+    encoded = tl_priv.serialize_license ld
+    decoded = tl_pub.deserialize_license encoded, :verify_signature => false
+    ld.each_pair do |prop, val|
+      assert_equal val, decoded[prop], "License data should not change through serialization/deserialization"
+    end
+
+    assert_raise TrubyLicense::InvalidLicense do
+      decoded = t2_pub.deserialize_license encoded
+    end
+
+  end
 
   def test_license_invalid_if_wrong_password
     ld = TrubyLicense::LicenseData.new
