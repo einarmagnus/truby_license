@@ -49,9 +49,9 @@ class TestTrubyLicense < Test::Unit::TestCase
     ld.notAfter = 10.days.from_now
     ld.extra = "an <html><document /></html>"
     ld.subject = "Some subject"
-    ld.holder = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.holder = "CN=Einar Boson"
     ld.issued = Time.at(Time.now.to_i) # strip ns
-    ld.issuer = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.issuer = "CN=Einar Boson"
     tl_priv = TrubyLicense.new "my secret password", @key1[:priv]
     tl_pub = TrubyLicense.new "my secret password", @key1[:pub]
 
@@ -62,32 +62,7 @@ class TestTrubyLicense < Test::Unit::TestCase
     end
   end
 
-  def test_automatic_x500_wrapping
-    ld = TrubyLicense::LicenseData.new
-
-    ld.consumerType = "0"
-    ld.notBefore = 5.days.ago
-    ld.notAfter = 10.days.from_now
-    ld.extra = "an <html><document /></html>"
-    ld.subject = "Some subject"
-    ld.holder = "CN=Einar Boson1"
-    ld.issued = Time.at(Time.now.to_i) # strip ns
-    ld.issuer = "CN=Einar Boson2"
-
-    tl_priv = TrubyLicense.new "my secret password", @key1[:priv]
-    tl_pub = TrubyLicense.new "my secret password", @key1[:pub]
-
-    encoded = tl_priv.serialize_license ld
-    decoded = tl_pub.deserialize_license encoded
-
-    assert decoded.holder.respond_to?(:name) && decoded.holder.name == "CN=Einar Boson1",
-            "holder should be automatically wrapped as an X500 object"
-    assert decoded.issuer.respond_to?(:name) && decoded.issuer.name == "CN=Einar Boson2",
-            "issuer should be automatically wrapped as an X500 object"
-
-  end
-
-  def test_exception_on_serializing_With_public_key
+  def test_exception_on_serializing_with_public_key
     ld = TrubyLicense::LicenseData.new
 
     ld.consumerType = "0"
@@ -114,9 +89,9 @@ class TestTrubyLicense < Test::Unit::TestCase
     ld.notAfter = 10.days.from_now
     ld.extra = "an <html><document /></html>"
     ld.subject = "Some subject"
-    ld.holder = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.holder = "CN=Einar Boson"
     ld.issued = Time.at(Time.now.to_i) # strip ns
-    ld.issuer = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.issuer = "CN=Einar Boson"
     tl_priv = TrubyLicense.new "my secret password", @key1[:priv]
     t2_pub = TrubyLicense.new "my secret password", @key2[:pub]
 
@@ -127,6 +102,8 @@ class TestTrubyLicense < Test::Unit::TestCase
     end
   end
 
+
+
   def test_license_invalid_if_wrong_password
     ld = TrubyLicense::LicenseData.new
 
@@ -135,9 +112,9 @@ class TestTrubyLicense < Test::Unit::TestCase
     ld.notAfter = 10.days.from_now
     ld.extra = "an <html><document /></html>"
     ld.subject = "Some subject"
-    ld.holder = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.holder = "CN=Einar Boson"
     ld.issued = Time.at(Time.now.to_i) # strip ns
-    ld.issuer = TrubyLicense::X500Principal.new "CN=Einar Boson"
+    ld.issuer = "CN=Einar Boson"
     tl_priv = TrubyLicense.new "my secret password", @key1[:priv]
     t1_pub = TrubyLicense.new "wrong password", @key1[:pub]
 

@@ -75,8 +75,8 @@ class TrubyLicense
           :long => lambda { |value, p| value.to_i },
           :string => lambda { |value, p| value },
           "java.util.Date" => lambda { |value, p| Time.at(value / 1000) },
-          "javax.security.auth.x500.X500Principal" => lambda { |value, p| X500Principal.new value },
-          "de.schlichtherle.license.LicenseContent" => lambda {|value, properties|
+          "javax.security.auth.x500.X500Principal" => lambda { |value, p| value },
+          "de.schlichtherle.license.LicenseContent" => lambda {|v, properties|
             ld = LicenseData.new
             ld.members.each do |prop|
               ld[prop] = properties[prop.to_sym]
